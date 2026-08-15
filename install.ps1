@@ -256,7 +256,12 @@ function Test-VM {
 		}
 
 		if (-not ($isVirtualModel)) {
-			return "You are not on a VM or have hardened your machine to not appear as such"
+			# Some hypervisors (e.g. QEMU/KVM) are not identifiable by the computer system model,
+			# but expose themselves via the manufacturer instead.
+			$computerSystemManufacturer = (Get-CimInstance win32_computersystem).manufacturer
+			if ($computerSystemManufacturer -ne "QEMU") {
+				return "You are not on a VM or have hardened your machine to not appear as such"
+			}
 		}
 	} catch {
 		return "Unable to determine if you are on a VM"
