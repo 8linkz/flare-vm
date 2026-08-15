@@ -46,3 +46,6 @@ UPSTREAM_PR_REVIEW.md
 
 # local Claude Code agent roles (fork-only, not published)
 .claude/
+
+# local Claude project instructions (fork-only, not published)
+CLAUDE.md
