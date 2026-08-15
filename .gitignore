@@ -52,3 +52,6 @@ CLAUDE.md
 
 # local upstream issue triage log (fork-only, not published)
 ISSUE_REVIEW.md
+
+# local test inventory & coverage doc (fork-only, not published)
+TESTING.md
