@@ -49,3 +49,6 @@ UPSTREAM_PR_REVIEW.md
 
 # local Claude project instructions (fork-only, not published)
 CLAUDE.md
+
+# local upstream issue triage log (fork-only, not published)
+ISSUE_REVIEW.md
