@@ -55,3 +55,8 @@ ISSUE_REVIEW.md
 
 # local test inventory & coverage doc (fork-only, not published)
 TESTING.md
+
+# Python test/coverage artifacts
+.coverage
+.pytest_cache/
+htmlcov/
