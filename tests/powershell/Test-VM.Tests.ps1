@@ -20,4 +20,20 @@ Describe 'Test-VM' {
         Mock Get-CimInstance { [pscustomobject]@{ model = 'Precision 5560'; manufacturer = 'Dell Inc.' } }
         Test-VM | Should -Match 'not on a VM'
     }
+
+    It 'detects a VMware VM by model' {
+        Mock Get-CimInstance { [pscustomobject]@{ model = 'VMware Virtual Platform'; manufacturer = 'VMware, Inc.' } }
+        Test-VM | Should -Be $null
+    }
+
+    It 'detects a Hyper-V VM by the "Virtual Machine" model' {
+        Mock Get-CimInstance { [pscustomobject]@{ model = 'Virtual Machine'; manufacturer = 'Microsoft Corporation' } }
+        Test-VM | Should -Be $null
+    }
+
+    It 'reports an error when the computer system model cannot be read' {
+        # A null model makes $computerSystemModel.Contains(...) throw, hitting the catch block.
+        Mock Get-CimInstance { [pscustomobject]@{ model = $null; manufacturer = $null } }
+        Test-VM | Should -Match 'Unable to determine if you are on a VM'
+    }
 }

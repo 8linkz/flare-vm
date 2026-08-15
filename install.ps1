@@ -220,7 +220,8 @@ function Test-WindowsVersion {
 	try {
 		$os = Get-CimInstance -Class Win32_OperatingSystem
 		$osMajorVersion = $os.Version.Split('.')[0] # Version examples: "6.1.7601", "10.0.19045"
-		if ($osMajorVersion -lt 10) {
+		# Cast to int: a string comparison would make e.g. "6" -lt 10 false and miss Windows < 10.
+		if ([int]$osMajorVersion -lt 10) {
 			return "Only Windows >= 10 is supported"
 		}
 	} catch {
