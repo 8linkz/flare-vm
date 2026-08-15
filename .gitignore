@@ -43,3 +43,6 @@ Thumbs.db
 
 # local upstream PR review log (fork-only, not published)
 UPSTREAM_PR_REVIEW.md
+
+# local Claude Code agent roles (fork-only, not published)
+.claude/
