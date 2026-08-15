@@ -1189,10 +1189,19 @@ function Get-Packages-Categories {
    $packagesByCategory=@{}
    do {
 	  # Download the XML from MyGet API
-	  Save-FileFromUrl -fileSource $vmPackagesUrl -fileDestination $vmPackagesFile --exitOnError
+	  Save-FileFromUrl -fileSource $vmPackagesUrl -fileDestination $vmPackagesFile -exitOnError
 
-	  # Load the XML content
-	  [xml]$vm_packages = Get-Content $vmPackagesFile
+	  # Load the XML content. A failed download (see -exitOnError above), a missing file, or an
+	  # empty/malformed response leaves us without a usable feed; abort with a clear error instead
+	  # of crashing later on a null reference (issues #709, #695, #736).
+	  try {
+	  	[xml]$vm_packages = Get-Content $vmPackagesFile -ErrorAction Stop
+	  } catch {
+	  	throw "The package feed could not be read from '$vmPackagesFile'. The download from MyGet may have failed or returned empty/malformed data. $_"
+	  }
+	  if (-not $vm_packages.feed) {
+	  	throw "The package feed could not be read from '$vmPackagesFile'. The download from MyGet may have failed or returned empty/malformed data."
+	  }
 
 	  # Define the namespaces defined in vm-packages.xml to access nodes
   # Each package resides in the entry node that is defined in the dataservices namespace
@@ -1202,6 +1211,10 @@ function Get-Packages-Categories {
 	  $ns.AddNamespace("d", "http://schemas.microsoft.com/ado/2007/08/dataservices")
 	  $ns.AddNamespace("m", "http://schemas.microsoft.com/ado/2007/08/dataservices/metadata")
 
+	  # Abort if the feed downloaded but contains no packages (e.g. MyGet returned an empty feed).
+	  if (-not $vm_packages.feed.entry) {
+	  	throw "The package feed downloaded from MyGet contains no packages. MyGet may be unavailable or returned an empty response. Please try again later."
+	  }
 	  # Extract package information from the XML
 	  $vm_packages.feed.entry | ForEach-Object {
 		 $isLatestVersion = $_.SelectSingleNode("m:properties/d:IsLatestVersion", $ns).InnerText
@@ -1264,7 +1277,14 @@ if (-not $noGui.IsPresent) {
 		$excludedCategories=@('Command and Control','Credential Access','Exploitation','Forensic','Lateral Movement', 'Payload Development','Privilege Escalation','Reconnaissance','Wordlists','Web Application')
 		# Read packages to install from the config
 		$packagesToInstall = $configXml.config.packages.package.name
-		$packagesByCategory = Get-Packages-Categories
+		try {
+			$packagesByCategory = Get-Packages-Categories
+		} catch {
+			Write-Host "[!] $_" -ForegroundColor Red
+			Write-Host "[!] Unable to retrieve the package list from MyGet. Check your Internet connection and try again later. $exit_message" -ForegroundColor Red
+			Start-Sleep 3
+			exit 1
+		}
 		$listedPackages = Get-AllPackages
 		$additionalPackages = Get-AdditionalPackages
 
