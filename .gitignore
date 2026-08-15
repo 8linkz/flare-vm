@@ -40,3 +40,6 @@ Thumbs.db
 # vscode
 # #################
 .vscode/
+
+# local upstream PR review log (fork-only, not published)
+UPSTREAM_PR_REVIEW.md
